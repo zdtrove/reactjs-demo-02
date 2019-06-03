@@ -195,6 +195,7 @@ class App extends Component {
     }
 
     render() {
+        console.log('Branch 01');
         var { tasksApp, isDisplayForm, taskEditing, filter, keyword, sort } = this.state; // var tasks = this.state.tasksApp
         if (filter) {
             if (filter.name) {
