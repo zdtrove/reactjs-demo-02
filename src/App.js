@@ -10,7 +10,17 @@ class App extends Component {
         super(props);
         this.state = {
             tasksApp : [],
-            isDisplayForm : false
+            isDisplayForm : false,
+            taskEditing : null,
+            filter : {
+                name : '',
+                status: -1
+            },
+            keyword : '',
+            sort : {
+                by : 'name',
+                value : 1
+            }
         }
     }
 
@@ -27,17 +37,32 @@ class App extends Component {
         var tasks = [
             {
                 id : this.generateID(),
-                name : 'A',
+                name : 'React JS',
                 status : true
             },
             {
                 id : this.generateID(),
-                name : 'B',
+                name : 'Angular 4',
                 status : false
             },
             {
                 id : this.generateID(),
-                name : 'C',
+                name : 'Laravel Dusk',
+                status : true
+            },
+            {
+                id : this.generateID(),
+                name : 'Codeigniter 3',
+                status : false
+            },
+            {
+                id : this.generateID(),
+                name : 'Vue JS',
+                status : false
+            },
+            {
+                id : this.generateID(),
+                name : 'Wordpress',
                 status : true
             }
         ];
@@ -55,10 +80,18 @@ class App extends Component {
         return this.s4() + '-' + this.s4() + '-' + this.s4() + '-' + this.s4() + '-' + this.s4() + '-' + this.s4() + '-' + this.s4();
     }
 
-    onToggleForm = () => {
-        this.setState({
-            isDisplayForm : !this.state.isDisplayForm
-        });
+    onToggleForm = () => { // Them Task
+        if (this.state.isDisplayForm && this.state.taskEditing !== null) {
+            this.setState({
+                isDisplayForm : true,
+                taskEditing : null
+            });
+        } else {
+            this.setState({
+                isDisplayForm : !this.state.isDisplayForm,
+                taskEditing : null
+            });
+        }
     }
 
     onCloseFormApp = () => {
@@ -67,20 +100,147 @@ class App extends Component {
         });
     }
 
+    onShowFormApp = () => {
+        this.setState({
+            isDisplayForm : true
+        });
+    }
+
     onSubmit = (data) => {
         var { tasksApp } = this.state;
-        data.id = this.generateID();
-        tasksApp.push(data);
+        if (data.id === '') {
+            data.id = this.generateID();
+            tasksApp.push(data);
+        } else {
+            // Editing
+            var index = this.findIndex(data.id);
+            tasksApp[index] = data;
+        }
         this.setState({
-            tasksApp : tasksApp
+            tasksApp : tasksApp,
+            taskEditing : null
         });
         localStorage.setItem('tasks', JSON.stringify(tasksApp));
-    }   
+    }
+
+    onUpdateStatus = (id) => {
+        var { tasksApp } = this.state;
+        var index = this.findIndex(id);
+        if (index !== -1) {
+            tasksApp[index].status = !tasksApp[index].status
+            this.setState({
+                tasksApp : tasksApp
+            });
+        }
+        localStorage.setItem('tasks', JSON.stringify(tasksApp));
+    }
+
+    findIndex = (id) => {
+        var { tasksApp } = this.state;
+        var result = -1;
+        tasksApp.forEach((task, index) => {
+            if (task.id === id) {
+                result = index;
+            }
+        });
+        return result;
+    }
+
+    onDelete = (id) => {
+        var { tasksApp } = this.state;
+        var index = this.findIndex(id);
+        if (index !== -1) {
+            tasksApp.splice(index, 1);
+            this.setState({
+                tasksApp : tasksApp
+            });
+        } 
+        localStorage.setItem('tasks',JSON.stringify(tasksApp));
+        this.onCloseFormApp();
+    }
+
+    onUpdate = (id) => {
+        var { tasksApp } = this.state;
+        var index = this.findIndex(id);
+        var taskEditing = tasksApp[index];
+        this.setState({
+            taskEditing : taskEditing
+        });
+        this.onShowFormApp();
+    }
+
+    onFilter = (filterName, filterStatus) => {
+        filterStatus = parseInt(filterStatus, 10);
+        this.setState({
+            filter : {
+                name : filterName.toLowerCase(),
+                status : filterStatus
+            }
+        });
+    }
+
+    onSearch = (keyword) => {
+        this.setState({
+            keyword : keyword
+        });
+    }
+
+    onSort = (sortBy, sortValue) => {
+        this.setState({
+            sort : {
+                by : sortBy,
+                value : sortValue
+            }
+        });
+    }
 
     render() {
-        var { tasksApp, isDisplayForm } = this.state; // var tasks = this.state.tasksApp
+        var { tasksApp, isDisplayForm, taskEditing, filter, keyword, sort } = this.state; // var tasks = this.state.tasksApp
+        if (filter) {
+            if (filter.name) {
+                tasksApp = tasksApp.filter((task) => {
+                    return task.name.toLowerCase().indexOf(filter.name) !== -1;
+                });
+            }
+            //if (filter.status) { // !== null !== undefined !== 0
+                tasksApp = tasksApp.filter((task) => {
+                    if (filter.status === -1) {
+                        return tasksApp;
+                    } else {
+                        return task.status === (filter.status === 1 ? true : false)
+                    }
+                });
+            //}
+        }
+
+        if (keyword) {
+            tasksApp = tasksApp.filter((task) => {
+                return task.name.toLowerCase().indexOf(keyword) !== -1;
+            });
+        }
+
+        if (sort.by === 'name') {
+            tasksApp.sort((a, b) => { 
+                if (a.name > b.name) return sort.value;
+                else if (a.name < b.name) return -sort.value;
+                else return 0;
+            });
+        }
+
+        if (sort.by === 'status') {
+            tasksApp.sort((a, b) => { 
+                if (a.status > b.status) return -sort.value;
+                else if (a.status < b.status) return sort.value;
+                else return 0;
+            });
+        }
+
         var elmTaskForm = isDisplayForm 
-            ? <TaskForm onSubmit={ this.onSubmit } onCloseFormApp={ this.onCloseFormApp } /> 
+            ? <TaskForm 
+                onSubmit={ this.onSubmit } 
+                onCloseFormApp={ this.onCloseFormApp }
+                taskEditing={ taskEditing }
+            /> 
             : '';
         return (
             <div className="container">
@@ -110,10 +270,19 @@ class App extends Component {
                             </div>
                         </div>
                         { /* Search - Sort */ }
-                        <Control />
+                        <Control 
+                            onSearch={ this.onSearch }
+                            onSort={ this.onSort }
+                        />
                         { /* List */ }
                         <div className="form-group">
-                            <TaskList tasksFromAppToTaskList={ tasksApp } />
+                            <TaskList 
+                                tasksFromAppToTaskList={ tasksApp }
+                                onUpdateStatus={ this.onUpdateStatus }
+                                onDelete={ this.onDelete }
+                                onUpdate={ this.onUpdate }
+                                onFilter={ this.onFilter }
+                            />
                         </div>
                     </div>
                 </div>
