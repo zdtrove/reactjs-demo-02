@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import * as actions from './../actions/index';
 
 class TaskForm extends Component {
 
@@ -12,53 +14,43 @@ class TaskForm extends Component {
     }
 
     componentWillMount() {
-        if (this.props.taskEditing) {
+        if (this.props.itemEditing && this.props.itemEditing.id !== null) {
             this.setState({
-                id : this.props.taskEditing.id,
-                name : this.props.taskEditing.name,
-                status : this.props.taskEditing.status
+                id : this.props.itemEditing.id,
+                name : this.props.itemEditing.name,
+                status : this.props.itemEditing.status
             });
+        } else {
+            this.onClear();
         }
     }
 
     componentWillReceiveProps(nextProps) {
-        if (nextProps && nextProps.taskEditing) {
+        if (nextProps && nextProps.itemEditing) {
             this.setState({
-                id : nextProps.taskEditing.id,
-                name : nextProps.taskEditing.name,
-                status : nextProps.taskEditing.status
+                id : nextProps.itemEditing.id,
+                name : nextProps.itemEditing.name,
+                status : nextProps.itemEditing.status
             });
-        } else if (!nextProps.taskEditing) {
-            this.setState({
-                id : '',
-                name : '',
-                status : false
-            });
+        } else {
+            this.onClear();
         }
     }
 
-    onCloseFormTaskForm = () => {
-        this.props.onCloseFormApp();
-    }
-
-    onChange = (event) => {
+    onHandleChange = (event) => {
         var target = event.target;
         var name = target.name;
-        var value = target.value;
-        if (name === 'status') {
-            value = target.value === 'true' ? true : false;
-        }
+        var value = target.type === 'checkbox' ? target.checked : target.value;
         this.setState({
             [name] : value
         });
     }
 
-    onSubmit = (event) => {
+    onSave = (event) => {
         event.preventDefault();
-        this.props.onSubmit(this.state);
-        // Cancel & Close Form
+        this.props.onSaveTask(this.state);
         this.onClear();
-        this.onCloseFormTaskForm();
+        this.onExitForm();
     }
 
     onClear = () => {
@@ -68,21 +60,25 @@ class TaskForm extends Component {
         });
     }
 
+    onExitForm = () => {
+        this.props.onCloseForm();
+    }
+
     render() {
-        var { id } = this.state;
+        if (!this.props.isDisplayForm) return null;
         return (
             <div className="panel panel-warning">
                 <div className="panel-heading">
                     <h3 className="panel-title">
-                        { id !== '' ? 'Cập Nhật Công Việc' : 'Thêm Công Việc' }
+                        { this.state.id !== '' ? 'Cập Nhật Công Việc' : 'Thêm Công Việc' }
                     </h3>
                     <span 
                         className="fa fa-times-circle text-right"
-                        onClick={ this.onCloseFormTaskForm }
+                        onClick={ this.onExitForm }
                     ></span>
                 </div>
                 <div className="panel-body">
-                    <form onSubmit={ this.onSubmit }>
+                    <form onSubmit={ this.onSave }>
                         <div className="form-group">
                             <label>Tên: </label>
                             <input 
@@ -90,7 +86,7 @@ class TaskForm extends Component {
                                 className="form-control" 
                                 name="name"
                                 value={ this.state.name }
-                                onChange={ this.onChange }
+                                onChange={ this.onHandleChange }
                             />
                         </div>
                         <label>Trạng Thái: </label>
@@ -98,10 +94,10 @@ class TaskForm extends Component {
                             className="form-control"
                             name="status"
                             value={ this.state.status }
-                            onChange={ this.onChange }
+                            onChange={ this.onHandleChange }
                         >
-                            <option value={true}>Kích Hoạt</option>
-                            <option value={false}>Ẩn</option>
+                            <option value={ true }>Kích Hoạt</option>
+                            <option value={ false }>Ẩn</option>
                         </select><br />
                         <div className="text-center">
                             <button type="submit" className="btn btn-warning"><span className="fa fa-plus mr-5"></span>Lưu Lại</button>&nbsp;
@@ -118,4 +114,22 @@ class TaskForm extends Component {
     }
 }
 
-export default TaskForm;
+const mapStateToProps = (state) => {
+    return {
+        isDisplayForm : state.isDisplayForm,
+        itemEditing : state.itemEditing
+    }
+};
+
+const mapDispatchToProps = (dispatch, props) => {
+    return {
+        onSaveTask : (task) => {
+            dispatch(actions.saveTask(task));
+        },
+        onCloseForm : () => {
+            dispatch(actions.closeForm())
+        }
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(TaskForm);
