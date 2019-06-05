@@ -7,7 +7,7 @@ class Control extends Component {
     render() {
         return (
             <div className="row">
-                <TaskSearchControl onSearch={ this.props.onSearch } />
+                <TaskSearchControl />
                 <TaskSortControl onSort={ this.props.onSort } />
             </div>
         );

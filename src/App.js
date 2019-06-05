@@ -51,13 +51,6 @@ class App extends Component {
     render() {
         var { isDisplayForm } = this.props;
         
-
-        // if (keyword) {
-        //     tasksApp = tasksApp.filter((task) => {
-        //         return task.name.toLowerCase().indexOf(keyword) !== -1;
-        //     });
-        // }
-
         // if (sort.by === 'name') {
         //     tasksApp.sort((a, b) => { 
         //         if (a.name > b.name) return sort.value;
