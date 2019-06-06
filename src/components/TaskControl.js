@@ -2,16 +2,16 @@ import React, { Component } from 'react';
 import TaskSearchControl from './TaskSearchControl';
 import TaskSortControl from './TaskSortControl';
 
-class Control extends Component {
+class TaskControl extends Component {
 
     render() {
         return (
             <div className="row">
                 <TaskSearchControl />
-                <TaskSortControl onSort={ this.props.onSort } />
+                <TaskSortControl />
             </div>
         );
     }
 }
 
-export default Control;
+export default TaskControl;

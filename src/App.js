@@ -8,17 +8,6 @@ import * as actions from './actions/index';
 
 class App extends Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            keyword : '',
-            sort : {
-                by : 'name',
-                value : 1
-            }
-        }
-    }
-
     onToggleForm = () => {
         var { itemEditing } = this.props;
         if (itemEditing && itemEditing !== '') {
@@ -33,39 +22,9 @@ class App extends Component {
         });
     }
 
-    onSearch = (keyword) => {
-        this.setState({
-            keyword : keyword
-        });
-    }
-
-    onSort = (sortBy, sortValue) => {
-        this.setState({
-            sort : {
-                by : sortBy,
-                value : sortValue
-            }
-        });
-    }
-
     render() {
-        var { isDisplayForm } = this.props;
-        
-        // if (sort.by === 'name') {
-        //     tasksApp.sort((a, b) => { 
-        //         if (a.name > b.name) return sort.value;
-        //         else if (a.name < b.name) return -sort.value;
-        //         else return 0;
-        //     });
-        // }
 
-        // if (sort.by === 'status') {
-        //     tasksApp.sort((a, b) => { 
-        //         if (a.status > b.status) return -sort.value;
-        //         else if (a.status < b.status) return sort.value;
-        //         else return 0;
-        //     });
-        // }
+        var { isDisplayForm } = this.props;
 
         return (
             <div className="container">
@@ -80,17 +39,13 @@ class App extends Component {
                         <div className="row">
                             <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                 <div className="form-group">
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-primary"
-                                        onClick={ this.onToggleForm }
-                                    >
+                                    <button type="button" className="btn btn-primary" onClick={ this.onToggleForm }>
                                         Thêm Công Việc
                                     </button>&nbsp;
                                 </div>
                             </div>
                         </div>
-                        <TaskControl onSearch={ this.onSearch } onSort={ this.onSort } />
+                        <TaskControl />
                         <div className="form-group">
                             <TaskList />
                         </div>
